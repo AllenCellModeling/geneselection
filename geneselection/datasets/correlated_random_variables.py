@@ -100,3 +100,25 @@ class CorrelatedNormal:
             mean=np.zeros(len(self.Sigma)), cov=self.Sigma, size=n_samples
         )
         return sc.AnnData(X=X)
+
+
+def load(
+    n_samples=20000,
+    n_groups=5,
+    group_size=10,
+    n_singeltons=50,
+    diagonal_weight=1 / np.e,
+    off_diagonal_weight=1,
+):
+
+    hubspokedata = HubSpokeData(
+        n_groups=n_groups,
+        group_size=group_size,
+        n_singeltons=n_singeltons,
+        diagonal_weight=diagonal_weight,
+        off_diagonal_weight=off_diagonal_weight,
+    )
+
+    adata = hubspokedata.sample(n_samples)
+
+    return adata
