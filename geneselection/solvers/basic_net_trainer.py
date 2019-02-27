@@ -6,8 +6,8 @@ import pickle
 import shutil
 
 import torch
-from .. import utils
-from ..utils import plots
+from ..utils.utils import save_state
+from ..utils.plots import history
 
 # This is the base class for trainers
 
@@ -67,14 +67,14 @@ class Model(object):
         net_save_path = "{0}/net.pth".format(save_dir)
         net_save_path_final = "{0}/net_{1}.pth".format(save_dir, n_iters)
 
-        utils.utils.save_state(self.net, self.opt, net_save_path, gpu_id)
+        save_state(self.net, self.opt, net_save_path, gpu_id)
         shutil.copyfile(net_save_path, net_save_path_final)
 
         pickle.dump(self.logger, open("{0}/logger.pkl".format(save_dir), "wb"))
 
     def save_progress(self):
         # History
-        plots.history(
+        history(
             self.logger,
             "{0}/history.png".format(self.save_dir),
             loss_ax1=["recon_loss", "valid_loss"],
@@ -86,7 +86,7 @@ class Model(object):
         if history_len > 10000:
             history_len = 10000
 
-        plots.history(
+        history(
             self.logger,
             "{0}/history_short.png".format(self.save_dir),
             loss_ax1=["recon_loss", "valid_loss"],

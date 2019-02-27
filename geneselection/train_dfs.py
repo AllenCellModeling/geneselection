@@ -4,7 +4,7 @@ import os
 import sys
 import torch
 import torch.optim
-import geneselection.utils as utils
+from geneselection.utils.data import split_anndata, transform
 from geneselection.datasets.dataset import gsdataset_from_anndata
 import numpy as np
 import pickle
@@ -40,14 +40,12 @@ def run(
     anndataset_module = importlib.import_module(dataset_kwargs["name"])
     anndata = anndataset_module.load(**dataset_kwargs["kwargs"])
 
-    _, anndata_splits = utils.data.split_anndata(
-        anndata, test_size=0.2, random_state=seed
-    )
+    _, anndata_splits = split_anndata(anndata, test_size=0.2, random_state=seed)
 
     ds_train = gsdataset_from_anndata(anndata_splits["train"], **gsdataset_kwargs)
     ds_validate = gsdataset_from_anndata(anndata_splits["test"], **gsdataset_kwargs)
 
-    ds_train, ds_validate, transformer = utils.data.transform(
+    ds_train, ds_validate, transformer = transform(
         ds_train, ds_validate, transform_method
     )
     pickle.dump(transformer, open("{0}/transform.pkl".format(save_dir), "wb"))
