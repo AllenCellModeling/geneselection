@@ -1,6 +1,7 @@
 results
 data
 cache
+experiments
 data_files/
 data_cache/
 scratch_files/
