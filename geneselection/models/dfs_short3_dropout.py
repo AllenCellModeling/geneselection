@@ -64,13 +64,11 @@ class Model(BasicModel):
 
         def weights_init(m):
             if isinstance(m, nn.Linear):
-                nn.init.normal_(m.weight, 0, 0.2)
+                nn.init.constant_(m.weight, 1 / m.in_features)
                 if m.bias is not None:
                     nn.init.zeros_(m.bias)
-            elif isinstance(m, nn.BatchNorm1d):
-                nn.init.normal_(m.weight, 0, 0.2)
-                if m.bias is not None:
-                    nn.init.zeros_(m.bias)
+            elif isinstance(m, nn.PReLU):
+                nn.init.constant_(m.weight, 1)
 
         self.main.apply(weights_init)
 
