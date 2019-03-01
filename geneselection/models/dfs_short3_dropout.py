@@ -4,35 +4,29 @@ import torch
 from .dfs_basic import Model as BasicModel
 
 
-class BasicLayer(nn.Module):
-    def __init__(self, n_in, n_out, actvation="ReLU", bias=False, p_dropout=0.1):
-        super(BasicLayer, self).__init__()
-
-        self.main = nn.Sequential(
-            nn.BatchNorm1d(n_out),
-            nn.Dropout(p=p_dropout),
-            nn.Linear(n_in, n_out, bias=bias),
-            nn.ReLU(inplace=True),
-        )
-
-    def forward(self, x):
-        x = self.main(x)
-
-        return x
-
-
 class ResidualLayer(nn.Module):
-    def __init__(self, n_in, actvation="PReLU", bias=False):
+    def __init__(self, n_in, actvation="PReLU", bias=False, batchnorm=False):
         super(ResidualLayer, self).__init__()
 
-        self.main = nn.Sequential(
-            nn.BatchNorm1d(n_in), nn.Linear(n_in, n_in, bias=bias), nn.PReLU()
-        )
+        if batchnorm:
+            self.main = nn.Sequential(
+                nn.BatchNorm1d(n_in),
+                nn.PReLU(),
+                nn.Linear(n_in, n_in, bias=bias),
+                nn.BatchNorm1d(n_in),
+                nn.PReLU(),
+                nn.Linear(n_in, n_in, bias=bias),
+            )
+        else:
+            self.main = nn.Sequential(
+                nn.PReLU(),
+                nn.Linear(n_in, n_in, bias=bias),
+                nn.PReLU(),
+                nn.Linear(n_in, n_in, bias=bias),
+            )
 
     def forward(self, x):
-        x = self.main(x) + x
-
-        return x
+        return self.main(x) + x
 
 
 class Model(BasicModel):
@@ -44,7 +38,9 @@ class Model(BasicModel):
         w_thresh=1e-2,
         n_mid=128,
         bias=False,
-        p_dropout=0.1,
+        p_dropout_in=0.1,
+        p_dropout_out=0.1,
+        batchnorm=False,
         pretrain=False,
     ):
         super(Model, self).__init__()
@@ -56,9 +52,9 @@ class Model(BasicModel):
 
         self.main = nn.Sequential(
             nn.Linear(n_in, n_mid, bias=bias),
-            nn.Dropout(p=p_dropout),
-            ResidualLayer(n_mid),
-            ResidualLayer(n_mid),
+            nn.Dropout(p=p_dropout_in),
+            ResidualLayer(n_mid, batchnorm=batchnorm),
+            nn.Dropout(p=p_dropout_out),
             nn.Linear(n_mid, n_in, bias=bias),
         )
 
