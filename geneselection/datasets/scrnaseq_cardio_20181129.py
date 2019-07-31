@@ -14,7 +14,10 @@ def preprocess_cardio(
 ):
 
     # load list of protein coding genes
-    df = pd.read_csv(f_coding_genes, delimiter="\t")
+    df = pd.read_csv(
+        "/allen/aics/modeling/rorydm/projects/geneselection/all_human_protein_genes_and_exons.txt",
+        delimiter="\t",
+    )
     coding_genes = [str(g) + "_HUMAN" for g in df["Gene name"].unique()]
 
     # filter our data for only protein coding genes
@@ -22,7 +25,7 @@ def preprocess_cardio(
     adata = adata_in[:, cols]
 
     # filter for the days we want
-    if days is not "all":
+    if days != "all":
         adata = adata[adata.obs["day"].isin(days)].copy()
 
     # filter for genes that apoear in at least x frac of cells
@@ -43,6 +46,7 @@ def load(
     selected_genes_path=None,
     threshold=0,
     days="all",
+    transform=None,
 ):
     """
     Load requested split of cardio data, where the whole dataset originated at original_fpath.
@@ -78,7 +82,7 @@ def load(
     adata = preprocess_cardio(
         adata,
         nz_thresh=threshold,
-        transform=None,
+        transform=transform,
         f_coding_genes=selected_genes_path,
         days=days,
     )
